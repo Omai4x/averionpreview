@@ -1,0 +1,2842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Averion – Precision in Motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #040a18;
+    --navy-mid: #071428;
+    --navy-light: #0c1e3d;
+    --blue-core: #1a6fff;
+    --blue-bright: #3d9bff;
+    --blue-glow: #00c3ff;
+    --blue-dim: #0f3a80;
+    --text-primary: #e8f4ff;
+    --text-secondary: #8ab4d8;
+    --text-muted: #4a6d8c;
+    --border-glow: rgba(26, 111, 255, 0.35);
+    --border-subtle: rgba(26, 111, 255, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Exo 2', sans-serif;
+    background: var(--navy);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--navy); }
+  ::-webkit-scrollbar-thumb { background: var(--blue-dim); border-radius: 3px; }
+
+  /* ─── GRID NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(26,111,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(26,111,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 6%;
+    background: rgba(4, 10, 24, 0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-subtle);
+    transition: all 0.3s ease;
+  }
+
+  nav.scrolled {
+    padding: 12px 6%;
+    background: rgba(4, 10, 24, 0.97);
+    border-bottom-color: var(--border-glow);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+  }
+
+  .nav-logo img {
+    height: 42px;
+    width: auto;
+  }
+
+  .nav-logo-text {
+    height: 22px;
+    width: auto;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transition: color 0.2s, text-shadow 0.2s;
+  }
+
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--blue-glow);
+    text-shadow: 0 0 20px rgba(0, 195, 255, 0.5);
+  }
+
+  .btn-nav {
+    background: transparent;
+    border: 1px solid var(--blue-core);
+    color: var(--blue-bright) !important;
+    padding: 8px 22px;
+    border-radius: 3px;
+    font-size: 13px !important;
+    transition: background 0.2s, box-shadow 0.2s !important;
+  }
+
+  .btn-nav:hover {
+    background: rgba(26, 111, 255, 0.12) !important;
+    box-shadow: 0 0 20px rgba(26, 111, 255, 0.3) !important;
+    text-shadow: none !important;
+  }
+
+  /* ─── DROPDOWN ─── */
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-toggle {
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dropdown-toggle::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--text-secondary);
+    transition: transform 0.2s, border-top-color 0.2s;
+    margin-left: 4px;
+  }
+
+  .dropdown.active .dropdown-toggle::after {
+    transform: rotate(180deg);
+    border-top-color: var(--blue-glow);
+  }
+
+  .dropdown.active .dropdown-toggle {
+    color: var(--blue-glow) !important;
+    text-shadow: 0 0 20px rgba(0, 195, 255, 0.5) !important;
+  }
+
+  /* ─── BURGER MENU ─── */
+  .burger-menu {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    z-index: 200;
+  }
+
+  .burger-line {
+    width: 24px;
+    height: 2px;
+    background: var(--text-secondary);
+    transition: all 0.3s;
+    border-radius: 1px;
+  }
+
+  .burger-menu.active .burger-line:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .burger-menu.active .burger-line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .burger-menu.active .burger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  /* Mobile Overlay */
+  .mobile-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(4, 10, 24, 0.95);
+    z-index: 150;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+
+  .mobile-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .mobile-nav {
+    position: fixed;
+    top: 70px;
+    left: auto;
+    right: 0;
+    width: 300px;
+    max-width: 80vw;
+    background: var(--navy);
+    z-index: 160;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-out;
+    max-height: calc(100vh - 70px);
+    overflow-y: auto;
+    border-left: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .mobile-nav.active {
+    transform: translateX(0);
+  }
+
+  .mobile-nav ul {
+    list-style: none;
+    padding: 20px 6%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .mobile-nav ul li {
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .mobile-nav ul li:last-child {
+    border-bottom: none;
+  }
+
+  .mobile-nav ul li a {
+    display: block;
+    padding: 16px 0;
+    color: var(--text-secondary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 0.2s, padding-left 0.2s;
+  }
+
+  .mobile-nav ul li a:hover {
+    color: var(--blue-glow);
+    padding-left: 10px;
+  }
+
+  .mobile-nav .btn-nav {
+    margin: 20px 6%;
+    text-align: center;
+  }
+
+  .mobile-dropdown-menu {
+    display: none;
+    background: rgba(4, 10, 24, 0.8);
+    padding-left: 20px;
+  }
+
+  .mobile-dropdown.active .mobile-dropdown-menu {
+    display: block;
+  }
+
+  .mobile-dropdown > a::after {
+    content: '▾';
+    margin-left: 8px;
+    font-size: 10px;
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+
+  .mobile-dropdown.active > a::after {
+    transform: rotate(180deg);
+  }
+
+  .mobile-dropdown-menu li a {
+    font-size: 14px;
+    padding: 12px 0;
+  }
+
+  /* ─── BACK TO TOP ─── */
+  .back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 48px;
+    height: 48px;
+    background: rgba(26, 111, 255, 0.9);
+    border: 1px solid var(--border-glow);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    z-index: 1000;
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    background: var(--blue-core);
+    box-shadow: 0 0 30px rgba(26, 111, 255, 0.6);
+    transform: translateY(-3px);
+  }
+
+  .back-to-top svg {
+    width: 24px;
+    height: 24px;
+    color: white;
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 220px;
+    background: rgba(4, 10, 24, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    padding: 6px 0;
+    list-style: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(26, 111, 255, 0.15);
+    z-index: 200;
+  }
+
+  .dropdown.active .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(4px);
+  }
+
+  .dropdown-menu li a {
+    display: block;
+    padding: 10px 20px;
+    color: var(--text-secondary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .dropdown-menu li a:hover {
+    background: rgba(26, 111, 255, 0.1);
+    color: var(--blue-glow);
+    text-shadow: 0 0 15px rgba(0, 195, 255, 0.3);
+  }
+
+  .dropdown-menu li a:first-child {
+    border-radius: 6px 6px 0 0;
+  }
+
+  .dropdown-menu li a:last-child {
+    border-radius: 0 0 6px 6px;
+  }
+
+  /* ─── PAGE SECTIONS ─── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  section { position: relative; z-index: 1; }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 6% 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(26, 111, 255, 0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 40% 50% at 80% 50%, rgba(0, 195, 255, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 40% at 10% 80%, rgba(26, 111, 255, 0.06) 0%, transparent 60%);
+  }
+
+  .hero-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: pulse 6s ease-in-out infinite;
+  }
+
+  .hero-orb-1 {
+    width: 600px; height: 600px;
+    background: rgba(26, 111, 255, 0.12);
+    top: -200px; right: -100px;
+    animation-delay: 0s;
+  }
+
+  .hero-orb-2 {
+    width: 400px; height: 400px;
+    background: rgba(0, 195, 255, 0.08);
+    bottom: 0; left: -100px;
+    animation-delay: 3s;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.08); }
+  }
+
+  .hero-content {
+    max-width: 700px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blue-glow);
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 32px; height: 1px;
+    background: var(--blue-glow);
+    box-shadow: 0 0 8px var(--blue-glow);
+  }
+
+  .hero h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(52px, 7vw, 88px);
+    font-weight: 700;
+    line-height: 1.0;
+    letter-spacing: -1px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero h1 span {
+    display: block;
+    background: linear-gradient(135deg, #ffffff 0%, var(--blue-glow) 60%, var(--blue-core) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 36px;
+    background: linear-gradient(135deg, var(--blue-core), var(--blue-bright));
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    box-shadow: 0 0 30px rgba(26, 111, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-primary:hover::after { left: 100%; }
+  .btn-primary:hover {
+    box-shadow: 0 0 50px rgba(26, 111, 255, 0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 36px;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--blue-bright);
+    color: var(--blue-bright);
+    background: rgba(26, 111, 255, 0.06);
+    box-shadow: 0 0 20px rgba(26, 111, 255, 0.2);
+  }
+
+  .hero-visual {
+    position: absolute;
+    right: 6%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    animation: fadeIn 1.2s 1s forwards;
+  }
+
+  .hero-logo-display {
+    width: 340px;
+    height: 340px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-logo-display img {
+    width: 240px;
+    height: auto;
+    filter: drop-shadow(0 0 40px rgba(26, 111, 255, 0.5)) drop-shadow(0 0 80px rgba(0, 195, 255, 0.2));
+    animation: floatLogo 5s ease-in-out infinite;
+  }
+
+  @keyframes floatLogo {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+
+  .ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid;
+    animation: spinRing linear infinite;
+  }
+
+  .ring-1 {
+    width: 300px; height: 300px;
+    border-color: rgba(26, 111, 255, 0.2);
+    animation-duration: 20s;
+  }
+  .ring-2 {
+    width: 340px; height: 340px;
+    border-color: rgba(0, 195, 255, 0.1);
+    animation-duration: 30s;
+    animation-direction: reverse;
+  }
+  .ring-3 {
+    width: 200px; height: 200px;
+    border-color: rgba(26, 111, 255, 0.15);
+    animation-duration: 15s;
+  }
+
+  @keyframes spinRing {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .ring::before {
+    content: '';
+    position: absolute;
+    width: 6px; height: 6px;
+    background: var(--blue-glow);
+    border-radius: 50%;
+    top: -3px; left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 10px var(--blue-glow), 0 0 20px var(--blue-glow);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ─── WHAT WE DO ─── */
+  .what-we-do {
+    padding: 120px 6%;
+    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 50%, var(--navy) 100%);
+  }
+
+  .section-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--blue-glow);
+    margin-bottom: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s;
+  }
+
+  .section-label.visible { opacity: 1; transform: translateY(0); }
+
+  .section-headline {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(36px, 4vw, 52px);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 32px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s 0.15s;
+  }
+
+  .section-headline.visible { opacity: 1; transform: translateY(0); }
+
+  .what-we-do-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .what-we-do-header {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .what-we-do-content {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .what-we-do-content p {
+    font-size: 17px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 1.85;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s 0.3s;
+  }
+
+  .what-we-do-content p.visible { opacity: 1; transform: translateY(0); }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .stat-card {
+    background: var(--navy-light);
+    border: 1px solid var(--border-subtle);
+    padding: 36px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, background 0.3s;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s, border-color 0.3s, background 0.3s;
+  }
+
+  .stat-card:hover {
+    border-color: var(--border-glow);
+    background: rgba(12, 30, 61, 0.8);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blue-core), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .stat-card:hover::before { opacity: 1; }
+  .stat-card.visible { opacity: 1; transform: translateY(0); }
+
+  .stat-number {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--blue-bright);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+
+  /* ─── SERVICES ─── */
+  .services-section {
+    padding: 120px 6%;
+  }
+
+  .services-section .section-headline { text-align: center; }
+  .services-section .section-label { text-align: center; }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    max-width: 1100px;
+    margin: 60px auto 0;
+    background: var(--border-subtle);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .service-card {
+    background: var(--navy);
+    padding: 52px 44px;
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    transition: background 0.3s;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s, transform 0.6s, background 0.3s;
+  }
+
+  .service-card:hover {
+    background: var(--navy-light);
+  }
+
+  .service-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0; height: 2px;
+    background: linear-gradient(90deg, var(--blue-core), var(--blue-glow));
+    transition: width 0.4s ease;
+  }
+
+  .service-card:hover::after { width: 100%; }
+
+  .service-card.visible { opacity: 1; transform: translateY(0); }
+
+  .service-icon {
+    width: 52px; height: 52px;
+    background: rgba(26, 111, 255, 0.1);
+    border: 1px solid var(--border-glow);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 28px;
+    font-size: 22px;
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+
+  .service-card:hover .service-icon {
+    background: rgba(26, 111, 255, 0.18);
+    box-shadow: 0 0 20px rgba(26, 111, 255, 0.25);
+  }
+
+  .inquire-btn {
+    margin-top: 20px;
+    align-self: flex-start;
+    background: transparent;
+    border: 1px solid var(--blue-core);
+    color: var(--blue-bright);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .inquire-btn:hover {
+    background: rgba(26, 111, 255, 0.15);
+    box-shadow: 0 0 20px rgba(26, 111, 255, 0.3);
+  }
+
+  .service-card h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    color: var(--text-primary);
+  }
+
+  .service-card p {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+
+  /* ─── WHY AVERION ─── */
+  .why-section {
+    padding: 120px 6%;
+    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-mid) 100%);
+    text-align: center;
+  }
+
+  .pillars-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 60px auto 0;
+  }
+
+  .pillar {
+    padding: 40px 24px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s, border-color 0.3s;
+  }
+
+  .pillar:hover {
+    border-color: var(--border-glow);
+    transform: translateY(-6px);
+  }
+
+  .pillar::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue-core), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .pillar:hover::before { opacity: 1; }
+  .pillar.visible { opacity: 1; transform: translateY(0); }
+  .pillar:hover { transform: translateY(-6px); }
+
+  .about-text, .mv-card, .pricing-card, .form-container {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .about-text.visible, .mv-card.visible, .pricing-card.visible, .form-container.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .pillar-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--blue-glow);
+    margin-bottom: 16px;
+  }
+
+  .pillar h4 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .pillar p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ─── CTA SECTION ─── */
+  .cta-section {
+    padding: 120px 6%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-glow {
+    position: absolute;
+    width: 600px; height: 300px;
+    background: radial-gradient(ellipse, rgba(26, 111, 255, 0.15) 0%, transparent 70%);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .cta-section h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(36px, 4vw, 54px);
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #fff 0%, var(--blue-glow) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .cta-section p {
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    margin-bottom: 44px;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.7;
+  }
+
+  /* ─── SERVICES PAGE ─── */
+  .services-page-hero {
+    padding: 160px 6% 80px;
+    text-align: center;
+    position: relative;
+  }
+
+  .services-page-hero h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(48px, 6vw, 72px);
+    font-weight: 700;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #fff 30%, var(--blue-glow) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .services-page-hero p {
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  .service-detail {
+    padding: 80px 6%;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+    border-bottom: 1px solid var(--border-subtle);
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.7s;
+  }
+
+  .service-detail.visible { opacity: 1; transform: translateY(0); }
+  .service-detail:last-of-type { border-bottom: none; }
+
+  .service-detail:nth-child(even) .service-detail-text { order: 2; }
+  .service-detail:nth-child(even) .service-detail-visual { order: 1; }
+
+  .service-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(26, 111, 255, 0.1);
+    border: 1px solid var(--border-glow);
+    padding: 8px 18px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blue-glow);
+    margin-bottom: 24px;
+  }
+
+  .service-detail h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(28px, 3vw, 38px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+
+  .service-detail > div > p {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 1.85;
+    margin-bottom: 32px;
+  }
+
+  .offer-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .offer-list li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  .offer-list li::before {
+    content: '';
+    display: block;
+    width: 20px; height: 1px;
+    background: var(--blue-core);
+    flex-shrink: 0;
+    box-shadow: 0 0 6px var(--blue-core);
+  }
+
+  .service-detail-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .service-vis-box {
+    width: 100%;
+    aspect-ratio: 1 / 0.85;
+    background: var(--navy-light);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .service-vis-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(135deg, rgba(26, 111, 255, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 70% 30%, rgba(0, 195, 255, 0.06) 0%, transparent 60%);
+  }
+
+  .service-vis-icon {
+    font-size: 80px;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 0 30px rgba(26, 111, 255, 0.4));
+    animation: floatLogo 4s ease-in-out infinite;
+  }
+
+  /* ─── ABOUT PAGE ─── */
+  .about-page-hero {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 160px 6% 80px;
+    position: relative;
+  }
+
+  .about-page-hero h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(40px, 6vw, 70px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin: 20px 0 30px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--blue-glow) 60%, var(--blue-core) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .about-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 6%;
+  }
+
+  .about-grid {
+    display: grid;
+    gap: 60px;
+  }
+
+  .about-text {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .about-text p {
+    font-size: 17px;
+    line-height: 1.9;
+    color: var(--text-secondary);
+  }
+
+  .mission-vision {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 6%;
+  }
+
+  .mv-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 40px;
+  }
+
+  .mv-card {
+    background: rgba(26, 111, 255, 0.05);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 40px;
+    transition: all 0.3s;
+  }
+
+  .mv-card:hover {
+    border-color: var(--border-glow);
+    box-shadow: 0 0 40px rgba(26, 111, 255, 0.15);
+  }
+
+  .mv-headline {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 600;
+    line-height: 1.4;
+    margin-top: 16px;
+    color: var(--text-primary);
+  }
+
+  /* ─── PRICING PAGE ─── */
+  .pricing-page-hero {
+    min-height: 50vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 140px 6% 60px;
+    position: relative;
+  }
+
+  .pricing-page-hero h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(40px, 6vw, 70px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin: 20px 0 30px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--blue-glow) 60%, var(--blue-core) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .pricing-page-hero p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    max-width: 500px;
+  }
+
+  .pricing-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 6%;
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--border-subtle);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .pricing-card {
+    background: var(--navy);
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+    transition: all 0.3s;
+  }
+
+  .pricing-card:hover {
+    background: var(--navy-mid);
+  }
+
+  .pricing-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(26, 111, 255, 0.1);
+    border: 1px solid var(--border-glow);
+    padding: 10px 20px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blue-glow);
+    width: fit-content;
+  }
+
+  .pricing-card h3 {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .pricing-amount {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--blue-glow);
+    margin-top: 16px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .pricing-section .cta-section {
+    margin-top: 80px;
+  }
+
+  /* ─── CONTACT PAGE ─── */
+  .contact-page-hero {
+    min-height: 50vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 140px 6% 60px;
+    position: relative;
+  }
+
+  .contact-page-hero h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(40px, 6vw, 70px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin: 20px 0 30px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--blue-glow) 60%, var(--blue-core) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .contact-page-hero p {
+    font-size: 18px;
+    color: var(--text-secondary);
+    max-width: 600px;
+  }
+
+  .contact-form-section {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 60px 6%;
+  }
+
+  .form-container {
+    background: rgba(4, 10, 24, 0.5);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 48px;
+  }
+
+  .form-group {
+    margin-bottom: 32px;
+  }
+
+  .form-group label {
+    display: block;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--blue-glow);
+    margin-bottom: 12px;
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group textarea {
+    width: 100%;
+    background: rgba(4, 10, 24, 0.8);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    padding: 16px 20px;
+    color: var(--text-primary);
+    font-family: 'Exo 2', sans-serif;
+    font-size: 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--blue-core);
+    box-shadow: 0 0 0 3px rgba(26, 111, 255, 0.15), 0 0 20px rgba(26, 111, 255, 0.2);
+  }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 150px;
+  }
+
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px 16px;
+    background: rgba(4, 10, 24, 0.6);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .checkbox-label:hover {
+    border-color: var(--border-glow);
+    background: rgba(26, 111, 255, 0.05);
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border-subtle);
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .checkbox-label input[type="checkbox"]:checked {
+    background: var(--blue-core);
+    border-color: var(--blue-core);
+  }
+
+  .checkbox-label input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  .checkbox-label span {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--blue-core), var(--blue-bright));
+    color: #fff;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 4px;
+    padding: 18px 36px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 30px rgba(26, 111, 255, 0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+
+  .submit-btn:hover {
+    box-shadow: 0 0 50px rgba(26, 111, 255, 0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+    margin: 0;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    padding: 60px 6% 30px;
+    border-top: 1px solid var(--border-subtle);
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .footer-col-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--blue-glow);
+    margin-bottom: 8px;
+  }
+
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .footer-logo img { height: 36px; }
+
+  .footer-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  .footer-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer-contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .footer-contact-item svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--blue-glow);
+    margin-top: 2px;
+  }
+
+  .footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    list-style: none;
+  }
+
+  .footer-links a {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-family: 'Exo 2', sans-serif;
+    transition: color 0.2s, padding-left 0.2s;
+    display: inline-block;
+  }
+
+  .footer-links a:hover {
+    color: var(--blue-glow);
+    padding-left: 5px;
+  }
+
+  .footer-bottom {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 30px;
+    margin-top: 20px;
+    border-top: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-copy {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  .footer-legal {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-legal a {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .footer-legal a:hover { color: var(--blue-glow); }
+
+  .social-links {
+    display: flex;
+    gap: 16px;
+  }
+
+  .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+
+  .social-link:hover {
+    border-color: var(--blue-glow);
+    color: var(--blue-glow);
+    background: rgba(26, 111, 255, 0.1);
+  }
+
+  .social-link svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  /* ─── TABLET & MOBILE (≤900px) ─── */
+  @media (max-width: 900px) {
+    .what-we-do-grid {
+      grid-template-columns: 1fr;
+    }
+    .pillars-grid { grid-template-columns: 1fr 1fr; }
+    .services-grid { grid-template-columns: 1fr; }
+    .service-detail { grid-template-columns: 1fr; gap: 40px; }
+    .service-detail:nth-child(even) .service-detail-text { order: 0; }
+    .service-detail:nth-child(even) .service-detail-visual { order: 0; }
+    .hero-visual { display: none; }
+    nav { padding: 16px 5%; }
+    .nav-links { gap: 20px; }
+    .mv-grid { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .dropdown-menu {
+      left: auto;
+      right: 0;
+      transform: none;
+      min-width: 200px;
+    }
+    .dropdown.active .dropdown-menu {
+      transform: translateY(4px);
+    }
+
+    /* Burger menu */
+    .burger-menu {
+      display: flex;
+    }
+
+    .nav-links {
+      display: none;
+    }
+
+    .nav-links.active {
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 70px;
+      left: 0;
+      right: 0;
+      background: var(--navy);
+      padding: 20px 6%;
+      gap: 0;
+      border-bottom: 1px solid var(--border-subtle);
+      z-index: 155;
+    }
+
+    .nav-links.active li {
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .nav-links.active li:last-child {
+      border-bottom: none;
+    }
+
+    .nav-links.active a {
+      padding: 14px 0;
+      font-size: 16px;
+    }
+
+    .nav-links.active .dropdown-menu {
+      position: static;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      background: rgba(4, 10, 24, 0.6);
+      box-shadow: none;
+      min-width: unset;
+      padding: 0;
+      margin-top: 8px;
+    }
+
+    .nav-links.active .dropdown.active .dropdown-menu {
+      display: block;
+    }
+
+    .mobile-overlay {
+      display: block;
+    }
+  }
+
+  /* ─── MOBILE (≤640px) ─── */
+  @media (max-width: 640px) {
+    .pillars-grid { grid-template-columns: 1fr; }
+    .nav-links .btn-nav { display: none; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .about-content, .pricing-section, .contact-form-section { padding: 40px 5%; }
+    .pricing-card { padding: 32px 24px; }
+    .form-container { padding: 32px 24px; }
+    .checkbox-group { grid-template-columns: 1fr; }
+    footer {
+      grid-template-columns: 1fr;
+      gap: 30px;
+      padding: 40px 5% 20px;
+    }
+    .footer-bottom {
+      flex-direction: column;
+      text-align: center;
+      gap: 12px;
+    }
+    .footer-col-title {
+      font-size: 11px;
+    }
+    .mobile-nav {
+      top: 60px;
+    }
+    .dropdown-menu {
+      position: fixed;
+      right: 5%;
+      left: auto;
+      top: 70px !important;
+      width: calc(100% - 10%);
+      min-width: unset;
+      transform: none !important;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s;
+    }
+    .dropdown.active .dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+    }
+    .dropdown-menu li a {
+      padding: 14px 20px;
+      font-size: 15px;
+    }
+  }
+
+  /* ─── LANDSCAPE ORIENTATION ─── */
+  @media (max-height: 768px) and (orientation: landscape) {
+    .hero {
+      min-height: 100vh;
+      padding: 100px 6% 60px;
+    }
+
+    .hero-orb-1 {
+      width: 400px;
+      height: 400px;
+    }
+
+    .hero-orb-2 {
+      width: 300px;
+      height: 300px;
+    }
+
+    .section-headline {
+      font-size: clamp(28px, 4vw, 42px);
+    }
+
+    .about-page-hero,
+    .pricing-page-hero,
+    .contact-page-hero {
+      min-height: 60vh;
+      padding: 120px 6% 40px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <a href="#" class="nav-logo" onclick="showPage('home'); return false;">
+    <img src="/mnt/user-data/uploads/logo-icon.png" alt="Averion">
+    <img src="/mnt/user-data/uploads/logo-text.png" class="nav-logo-text" alt="Averion">
+  </a>
+  <button class="burger-menu" id="burgerMenu" aria-label="Toggle menu">
+    <span class="burger-line"></span>
+    <span class="burger-line"></span>
+    <span class="burger-line"></span>
+  </button>
+  <ul class="nav-links">
+    <li><a href="#" id="nav-home" class="active" onclick="showPage('home'); return false;">Home</a></li>
+    <li><a href="#" id="nav-about" onclick="showPage('about'); return false;">About</a></li>
+    <li class="dropdown">
+      <a href="#" id="nav-services" class="dropdown-toggle" onclick="toggleDropdown(event); return false;">Services</a>
+      <ul class="dropdown-menu">
+        <li><a href="#" onclick="showServicePage('tech'); return false;">Tech Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('logistics'); return false;">Logistics Services</a></li>
+        <li><a href="#" onclick="showServicePage('ecommerce'); return false;">E-Commerce Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('health'); return false;">Health Services</a></li>
+      </ul>
+    </li>
+    <li><a href="#" id="nav-pricing" onclick="showPage('pricing'); return false;">Pricing</a></li>
+    <li><a href="#" id="nav-contact" onclick="showPage('contact'); return false;">Contact</a></li>
+    <li><a href="#" onclick="showPage('contact'); return false;" class="btn-nav">Book Consultation</a></li>
+  </ul>
+</nav>
+
+<!-- Mobile Navigation -->
+<div class="mobile-overlay" id="mobileOverlay"></div>
+<nav class="mobile-nav" id="mobileNav">
+  <ul>
+    <li><a href="#" onclick="closeMobileMenu(); showPage('home'); return false;">Home</a></li>
+    <li class="mobile-dropdown" id="mobileServices">
+      <a href="#" onclick="toggleMobileDropdown(event); return false;">Services ▾</a>
+      <ul class="mobile-dropdown-menu">
+        <li><a href="#" onclick="closeMobileMenu(); showServicePage('tech'); return false;">Tech Solutions</a></li>
+        <li><a href="#" onclick="closeMobileMenu(); showServicePage('logistics'); return false;">Logistics Services</a></li>
+        <li><a href="#" onclick="closeMobileMenu(); showServicePage('ecommerce'); return false;">E-Commerce Solutions</a></li>
+        <li><a href="#" onclick="closeMobileMenu(); showServicePage('health'); return false;">Health Services</a></li>
+      </ul>
+    </li>
+    <li><a href="#" onclick="closeMobileMenu(); showPage('about'); return false;">About</a></li>
+    <li><a href="#" onclick="closeMobileMenu(); showPage('pricing'); return false;">Pricing</a></li>
+    <li><a href="#" onclick="closeMobileMenu(); showPage('contact'); return false;">Contact</a></li>
+    <li><a href="#" onclick="closeMobileMenu(); showPage('contact'); return false;" class="btn-nav">Book Consultation</a></li>
+  </ul>
+</nav>
+
+<!-- Back to Top Button (appears on all pages) -->
+<a href="#" class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg>
+</a>
+
+<!-- ═══════════════ HOME PAGE ═══════════════ -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+
+    <div class="hero-content">
+      <div class="hero-eyebrow">Averion</div>
+      <h1>
+        <span>Precision</span>
+        <span>in motion.</span>
+      </h1>
+      <p class="hero-sub">We build systems that power technology, streamline logistics, and drive modern commerce.</p>
+      <div class="hero-ctas">
+        <a href="#" class="btn-primary" onclick="showPage('services'); return false;">Get Started</a>
+        <a href="#" class="btn-secondary" onclick="showPage('contact'); return false;">Book a Free Consultation</a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-logo-display">
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="ring ring-3"></div>
+        <img src="/mnt/user-data/uploads/logo-icon.png" alt="Averion">
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- WHAT WE DO -->
+  <section class="what-we-do" id="about">
+    <div class="what-we-do-grid">
+      <div class="what-we-do-header">
+        <div class="section-label">What We Do</div>
+        <h2 class="section-headline">Smart systems.<br>Real results.</h2>
+      </div>
+    </div>
+    <div class="what-we-do-content">
+      <p>At Averion, we help businesses operate smarter, move faster, and scale efficiently. From automation and digital infrastructure to logistics coordination and e-commerce optimization, we design solutions that deliver measurable impact.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span class="stat-number">4</span>
+        <span class="stat-label">Core Verticals</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">360°</span>
+        <span class="stat-label">Systems Approach</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">Fast</span>
+        <span class="stat-label">Implementation</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number">ROI</span>
+        <span class="stat-label">Focused Results</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SERVICES PREVIEW -->
+  <section class="services-section" id="services-preview">
+    <div class="section-label">Our Core Services</div>
+
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <h3>Tech Solutions</h3>
+        <p>We design and implement automation systems, digital workflows, and scalable tech infrastructure that eliminate inefficiencies and improve performance.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 22 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <h3>Logistics Services</h3>
+        <p>We streamline operations, optimize delivery processes, and implement systems that ensure speed, accuracy, and reliability.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        </div>
+        <h3>E-Commerce Solutions</h3>
+        <p>We help businesses build, optimize, and scale online stores with systems that increase conversions and simplify operations.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <h3>Health Services</h3>
+        <p>We support healthcare providers with operational systems, digital tools, and process improvements that enhance efficiency and service delivery.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- WHY AVERION -->
+  <section class="why-section">
+    <div class="section-label">Why Choose Averion</div>
+    <h2 class="section-headline">Built for execution.</h2>
+
+    <div class="pillars-grid">
+      <div class="pillar">
+        <div class="pillar-num">01</div>
+        <h4>Precision-driven approach</h4>
+        <p>Every system is designed with accuracy and intentionality at its core.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02</div>
+        <h4>Scalable systems</h4>
+        <p>Solutions that grow alongside your business without friction or limits.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03</div>
+        <h4>Fast implementation</h4>
+        <p>From strategy to deployment at speed — no drawn-out timelines.</p>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">04</div>
+        <h4>Results-focused solutions</h4>
+        <p>Measurable outcomes are the benchmark for everything we build.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CTA -->
+  <section class="cta-section" id="contact">
+    <div class="cta-glow"></div>
+    <div class="section-label">Get Started</div>
+    <h2>Ready to optimize<br>your business?</h2>
+    <p>Let's build systems that move your business forward.</p>
+    <a href="#" class="btn-primary" onclick="showPage('contact'); return false;">Book a Free Consultation</a>
+  </section>
+
+  <footer>
+    <div class="footer-col footer-brand">
+      <div class="footer-logo">
+        <img src="/mnt/user-data/uploads/logo-icon.png" alt="Averion">
+        <img src="/mnt/user-data/uploads/logo-text.png" style="height:20px;" alt="Averion">
+      </div>
+      <p class="footer-desc">Averion delivers integrated solutions across technology, logistics, commerce, and healthcare operations.</p>
+      <div class="social-links">
+        <a href="#" class="social-link" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="#" class="social-link" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Navigation</h4>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showPage('home'); return false;">Home</a></li>
+        <li><a href="#" onclick="showPage('about'); return false;">About</a></li>
+        <li><a href="#" onclick="showPage('services'); return false;">Services</a></li>
+        <li><a href="#" onclick="showPage('pricing'); return false;">Pricing</a></li>
+        <li><a href="#" onclick="showPage('contact'); return false;">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Services</h4>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showServicePage('tech'); return false;">Tech Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('logistics'); return false;">Logistics Services</a></li>
+        <li><a href="#" onclick="showServicePage('ecommerce'); return false;">E-Commerce Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('health'); return false;">Health Services</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Contact Us</h4>
+      <div class="footer-contact">
+        <div class="footer-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>hello@averion.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copy">© <span id="current-year">2025</span> Averion. All rights reserved.</span>
+      <div class="footer-legal">
+        <a href="#" onclick="return false;">Privacy Policy</a>
+        <a href="#" onclick="return false;">Terms of Service</a>
+        <a href="#" onclick="return false;">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /home page -->
+
+<!-- ═══════════════ SERVICES PAGE ═══════════════ -->
+<div class="page" id="page-services">
+
+  <section class="services-page-hero">
+    <div class="hero-bg"></div>
+    <div class="section-label" style="opacity:1;transform:none;">Averion</div>
+    <h1>Our Services</h1>
+    <p>Averion delivers integrated solutions across technology, logistics, commerce, and healthcare operations. Our focus is simple—build systems that work, scale, and deliver results.</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- TECH -->
+  <div class="service-detail" id="section-1">
+    <div class="service-detail-text">
+      <div class="service-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:6px;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Tech Solutions</div>
+      <h2>Technology that works for you.</h2>
+      <p>We design and implement smart technology systems that automate workflows, reduce manual tasks, and improve operational efficiency.</p>
+      <ul class="offer-list">
+        <li>Workflow automation</li>
+        <li>CRM setup and optimization</li>
+        <li>Business process automation</li>
+        <li>Dashboard and reporting systems</li>
+        <li>System integration</li>
+      </ul>
+      <button class="inquire-btn" onclick="handleInquire('tech')">Make Inquiry</button>
+    </div>
+    <div class="service-detail-visual">
+      <div class="service-vis-box">
+        <span class="service-vis-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGISTICS -->
+  <div class="service-detail" id="section-2">
+    <div class="service-detail-text">
+      <div class="service-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:6px;"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 22 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Logistics Services</div>
+      <h2>Efficiency in motion.</h2>
+      <p>We help businesses optimize logistics operations by improving coordination, tracking, and delivery systems.</p>
+      <ul class="offer-list">
+        <li>Dispatch and operations setup</li>
+        <li>Delivery tracking systems</li>
+        <li>Route and process optimization</li>
+        <li>Inventory and workflow management</li>
+        <li>Logistics consulting</li>
+      </ul>
+      <button class="inquire-btn" onclick="handleInquire('logistics')">Make Inquiry</button>
+    </div>
+    <div class="service-detail-visual">
+      <div class="service-vis-box">
+        <span class="service-vis-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ECOMMERCE -->
+  <div class="service-detail" id="section-3">
+    <div class="service-detail-text">
+      <div class="service-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:6px;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        E-Commerce Solutions</div>
+      <h2>Built to sell. Designed to scale.</h2>
+      <p>We support e-commerce businesses with systems that improve conversions, streamline operations, and drive growth.</p>
+      <ul class="offer-list">
+        <li>Store setup and optimization</li>
+        <li>Sales funnel development</li>
+        <li>Order and fulfillment automation</li>
+        <li>Customer journey optimization</li>
+        <li>Performance tracking</li>
+      </ul>
+      <button class="inquire-btn" onclick="handleInquire('ecommerce')">Make Inquiry</button>
+    </div>
+    <div class="service-detail-visual">
+      <div class="service-vis-box">
+        <span class="service-vis-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEALTH -->
+  <div class="service-detail" id="section-4">
+    <div class="service-detail-text">
+      <div class="service-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:6px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Health Services</div>
+      <h2>Operational excellence in healthcare.</h2>
+      <p>We provide healthcare organizations with systems that improve efficiency, compliance, and service delivery.</p>
+      <ul class="offer-list">
+        <li>Patient management systems</li>
+        <li>Workflow optimization</li>
+        <li>Digital record organization</li>
+        <li>Process automation</li>
+        <li>Operational consulting</li>
+      </ul>
+      <button class="inquire-btn" onclick="handleInquire('health')">Make Inquiry</button>
+    </div>
+    <div class="service-detail-visual">
+      <div class="service-vis-box">
+        <span class="service-vis-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SERVICES CTA -->
+  <section class="cta-section" id="services-contact">
+    <div class="cta-glow"></div>
+    <div class="section-label">Partner With Us</div>
+    <h2>Let's build your system.</h2>
+    <p>Partner with Averion to create solutions that deliver real results.</p>
+    <a href="#" class="btn-primary" onclick="return false;">Get Started</a>
+  </section>
+
+  <footer>
+    <div class="footer-col footer-brand">
+      <div class="footer-logo">
+        <img src="/mnt/user-data/uploads/logo-icon.png" alt="Averion">
+        <img src="/mnt/user-data/uploads/logo-text.png" style="height:20px;" alt="Averion">
+      </div>
+      <p class="footer-desc">Averion delivers integrated solutions across technology, logistics, commerce, and healthcare operations.</p>
+      <div class="social-links">
+        <a href="#" class="social-link" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="#" class="social-link" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Navigation</h4>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showPage('home'); return false;">Home</a></li>
+        <li><a href="#" onclick="showPage('about'); return false;">About</a></li>
+        <li><a href="#" onclick="showPage('services'); return false;">Services</a></li>
+        <li><a href="#" onclick="showPage('pricing'); return false;">Pricing</a></li>
+        <li><a href="#" onclick="showPage('contact'); return false;">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Services</h4>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showServicePage('tech'); return false;">Tech Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('logistics'); return false;">Logistics Services</a></li>
+        <li><a href="#" onclick="showServicePage('ecommerce'); return false;">E-Commerce Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('health'); return false;">Health Services</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Contact Us</h4>
+      <div class="footer-contact">
+        <div class="footer-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>123 Business Ave, Suite 100<br>San Francisco, CA 94102</span>
+        </div>
+        <div class="footer-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>hello@averion.com</span>
+        </div>
+        <div class="footer-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span>Mon-Fri 9am-6pm PST</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copy">© <span id="current-year">2025</span> Averion. All rights reserved.</span>
+      <div class="footer-legal">
+        <a href="#" onclick="return false;">Privacy Policy</a>
+        <a href="#" onclick="return false;">Terms of Service</a>
+        <a href="#" onclick="return false;">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /services page -->
+
+<!-- ═══════════════ ABOUT PAGE ═══════════════ -->
+<div class="page" id="page-about">
+
+  <section class="about-page-hero">
+    <div class="hero-bg"></div>
+    <div class="section-label" style="opacity:1;transform:none;">Averion</div>
+    <h1>About Averion</h1>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ABOUT CONTENT -->
+  <section class="about-content">
+    <div class="about-grid">
+      <div class="about-text">
+        <div class="section-label">Who We Are</div>
+        <h2 class="section-headline">Systems-driven. Results-focused.</h2>
+        <p>Averion is a systems-driven company focused on helping businesses operate smarter, faster, and more efficiently.</p>
+        <p>We specialize in building and implementing technology, logistics, and operational solutions that eliminate inefficiencies and drive real results.</p>
+        <p>Our approach is simple: Understand the problem. Build the system. Execute with precision.</p>
+        <p>From startups to growing businesses, Averion delivers scalable solutions designed for performance and long-term growth.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- MISSION & VISION -->
+  <section class="mission-vision">
+    <div class="mv-grid">
+      <div class="mv-card">
+        <div class="section-label">Mission</div>
+        <h3 class="mv-headline">To build systems that move businesses forward with precision and efficiency.</h3>
+      </div>
+      <div class="mv-card">
+        <div class="section-label">Vision</div>
+        <h3 class="mv-headline">To become a leading provider of intelligent systems across technology, logistics, and commerce.</h3>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-glow"></div>
+    <div class="section-label">Get Started</div>
+    <h2>Ready to optimize<br>your business?</h2>
+    <p>Let's build systems that move your business forward.</p>
+    <a href="#" class="btn-primary" onclick="showPage('contact'); return false;">Book a Free Consultation</a>
+  </section>
+
+  <footer>
+    <div class="footer-col footer-brand">
+      <div class="footer-logo">
+        <img src="/mnt/user-data/uploads/logo-icon.png" alt="Averion">
+        <img src="/mnt/user-data/uploads/logo-text.png" style="height:20px;" alt="Averion">
+      </div>
+      <p class="footer-desc">Averion delivers integrated solutions across technology, logistics, commerce, and healthcare operations.</p>
+      <div class="social-links">
+        <a href="#" class="social-link" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="#" class="social-link" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Navigation</h4>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showPage('home'); return false;">Home</a></li>
+        <li><a href="#" onclick="showPage('about'); return false;">About</a></li>
+        <li><a href="#" onclick="showPage('services'); return false;">Services</a></li>
+        <li><a href="#" onclick="showPage('pricing'); return false;">Pricing</a></li>
+        <li><a href="#" onclick="showPage('contact'); return false;">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Services</h4>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showServicePage('tech'); return false;">Tech Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('logistics'); return false;">Logistics Services</a></li>
+        <li><a href="#" onclick="showServicePage('ecommerce'); return false;">E-Commerce Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('health'); return false;">Health Services</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Contact Us</h4>
+      <div class="footer-contact">
+        <div class="footer-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>hello@averion.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copy">© <span id="current-year">2025</span> Averion. All rights reserved.</span>
+      <div class="footer-legal">
+        <a href="#" onclick="return false;">Privacy Policy</a>
+        <a href="#" onclick="return false;">Terms of Service</a>
+        <a href="#" onclick="return false;">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /about page -->
+
+<!-- ═══════════════ PRICING PAGE ═══════════════ -->
+<div class="page" id="page-pricing">
+
+  <section class="pricing-page-hero">
+    <div class="hero-bg"></div>
+    <div class="section-label" style="opacity:1;transform:none;">Averion</div>
+    <h1>Pricing</h1>
+    <p>Flexible solutions for growing businesses.</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- PRICING CARDS -->
+  <section class="pricing-section">
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <div class="pricing-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle;margin-right:8px;color:#4ade80;"><path d="M7 20h10"/><path d="M10 20c5.523 0 10-4.477 10-10S15.523 0 10 0 0 4.477 0 10c0 5 4.477 10 10 10"/><path d="M12 8v8"/><path d="M8 12l4 4 4-4"/></svg>
+          Starter Package</div>
+        <h3>Basic automation setup<br>Workflow optimization<br>1–2 systems implemented</h3>
+        <div class="pricing-amount">$300 – $500</div>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle;margin-right:8px;color:#3d9bff;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          Growth Package</div>
+        <h3>Advanced automation<br>CRM + integrations<br>Operations system setup</h3>
+        <div class="pricing-amount">$800 – $1,500</div>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle;margin-right:8px;color:#a855f7;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Pro Package</div>
+        <h3>Full business system build<br>Logistics / e-commerce integration<br>Dashboard + tracking</h3>
+        <div class="pricing-amount">Custom Pricing</div>
+      </div>
+
+      <div class="pricing-card">
+        <div class="pricing-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;display:inline-block;vertical-align:middle;margin-right:8px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Monthly Support (Optional)</div>
+        <h3>Maintenance<br>Updates<br>Optimization</h3>
+        <div class="pricing-amount">$100 – $300/month</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-glow"></div>
+    <div class="section-label">Let's Build Your System</div>
+    <h2>Let's build your system.</h2>
+    <a href="#" class="btn-primary" onclick="showPage('contact'); return false;">Book Consultation</a>
+  </section>
+
+  <footer>
+    <div class="footer-col footer-brand">
+      <div class="footer-logo">
+        <img src="/mnt/user-data/uploads/logo-icon.png" alt="Averion">
+        <img src="/mnt/user-data/uploads/logo-text.png" style="height:20px;" alt="Averion">
+      </div>
+      <p class="footer-desc">Averion delivers integrated solutions across technology, logistics, commerce, and healthcare operations.</p>
+      <div class="social-links">
+        <a href="#" class="social-link" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="#" class="social-link" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Navigation</h4>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showPage('home'); return false;">Home</a></li>
+        <li><a href="#" onclick="showPage('about'); return false;">About</a></li>
+        <li><a href="#" onclick="showPage('services'); return false;">Services</a></li>
+        <li><a href="#" onclick="showPage('pricing'); return false;">Pricing</a></li>
+        <li><a href="#" onclick="showPage('contact'); return false;">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Services</h4>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showServicePage('tech'); return false;">Tech Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('logistics'); return false;">Logistics Services</a></li>
+        <li><a href="#" onclick="showServicePage('ecommerce'); return false;">E-Commerce Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('health'); return false;">Health Services</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Contact Us</h4>
+      <div class="footer-contact">
+        <div class="footer-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>hello@averion.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copy">© <span id="current-year">2025</span> Averion. All rights reserved.</span>
+      <div class="footer-legal">
+        <a href="#" onclick="return false;">Privacy Policy</a>
+        <a href="#" onclick="return false;">Terms of Service</a>
+        <a href="#" onclick="return false;">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /pricing page -->
+
+<!-- ═══════════════ CONTACT PAGE ═══════════════ -->
+<div class="page" id="page-contact">
+
+  <section class="contact-page-hero">
+    <div class="hero-bg"></div>
+    <div class="section-label" style="opacity:1;transform:none;">Averion</div>
+    <h1>Contact Us</h1>
+    <p>Let's build your system. Tell us about your project and we'll get back to you within 24 hours.</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CONTACT FORM -->
+  <section class="contact-form-section">
+    <div class="form-container">
+      <form id="contact-form" onsubmit="handleSubmit(event)">
+        <div class="form-group">
+          <label for="name">Full Name *</label>
+          <input type="text" id="name" name="name" required placeholder="John Doe">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" name="email" required placeholder="john@company.com">
+        </div>
+
+        <div class="form-group">
+          <label for="company">Company (Optional)</label>
+          <input type="text" id="company" name="company" placeholder="Your Company">
+        </div>
+
+        <div class="form-group">
+          <label>Services You're Interested In *</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="services" value="Tech Solutions">
+              <span>Tech Solutions</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="services" value="Logistics Services">
+              <span>Logistics Services</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="services" value="E-Commerce Solutions">
+              <span>E-Commerce Solutions</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" name="services" value="Health Services">
+              <span>Health Services</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Your Message *</label>
+          <textarea id="message" name="message" rows="6" required placeholder="Tell us about your project, challenges, and goals..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="cta-glow"></div>
+    <div class="section-label">Get Started</div>
+    <h2>Ready to optimize<br>your business?</h2>
+    <p>Let's build systems that move your business forward.</p>
+    <a href="#" class="btn-primary" onclick="showPage('contact'); return false;">Book a Free Consultation</a>
+  </section>
+
+  <footer>
+    <div class="footer-col footer-brand">
+      <div class="footer-logo">
+        <img src="/mnt/user-data/uploads/logo-icon.png" alt="Averion">
+        <img src="/mnt/user-data/uploads/logo-text.png" style="height:20px;" alt="Averion">
+      </div>
+      <p class="footer-desc">Averion delivers integrated solutions across technology, logistics, commerce, and healthcare operations.</p>
+      <div class="social-links">
+        <a href="#" class="social-link" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        </a>
+        <a href="#" class="social-link" aria-label="GitHub">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Navigation</h4>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showPage('home'); return false;">Home</a></li>
+        <li><a href="#" onclick="showPage('about'); return false;">About</a></li>
+        <li><a href="#" onclick="showPage('services'); return false;">Services</a></li>
+        <li><a href="#" onclick="showPage('pricing'); return false;">Pricing</a></li>
+        <li><a href="#" onclick="showPage('contact'); return false;">Contact</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Services</h4>
+      <ul class="footer-links">
+        <li><a href="#" onclick="showServicePage('tech'); return false;">Tech Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('logistics'); return false;">Logistics Services</a></li>
+        <li><a href="#" onclick="showServicePage('ecommerce'); return false;">E-Commerce Solutions</a></li>
+        <li><a href="#" onclick="showServicePage('health'); return false;">Health Services</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4 class="footer-col-title">Contact Us</h4>
+      <div class="footer-contact">
+        <div class="footer-contact-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <span>hello@averion.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span class="footer-copy">© <span id="current-year">2025</span> Averion. All rights reserved.</span>
+      <div class="footer-legal">
+        <a href="#" onclick="return false;">Privacy Policy</a>
+        <a href="#" onclick="return false;">Terms of Service</a>
+        <a href="#" onclick="return false;">Cookie Policy</a>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /contact page -->
+
+<script>
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    document.getElementById('nav-' + name)?.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(checkVisibility, 100);
+  }
+
+  function toggleDropdown(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const dropdown = event.target.closest('.dropdown');
+    const wasActive = dropdown.classList.contains('active');
+
+    // Close all dropdowns
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+
+    // Toggle current dropdown
+    if (!wasActive) {
+      dropdown.classList.add('active');
+    }
+  }
+
+  function showServicePage(serviceType) {
+    // Close dropdown
+    document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+
+    // Navigate to services page
+    showPage('services');
+
+    // Scroll to specific service section after page loads
+    setTimeout(() => {
+      const sectionMap = {
+        'tech': 'section-1',
+        'logistics': 'section-2',
+        'ecommerce': 'section-3',
+        'health': 'section-4'
+      };
+
+      // Add IDs to service sections if they don't exist
+      const serviceDetails = document.querySelectorAll('.service-detail');
+      serviceDetails.forEach((detail, index) => {
+        if (!detail.id) {
+          detail.id = 'section-' + (index + 1);
+        }
+      });
+
+      const targetId = sectionMap[serviceType];
+      if (targetId) {
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    }, 300);
+  }
+
+  function scrollToSection(id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('.dropdown')) {
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('active'));
+    }
+  });
+
+  // Scroll-triggered animations
+  function checkVisibility() {
+    const animEls = document.querySelectorAll(
+      '.section-label, .section-headline, .what-we-do-content p, .stat-card, .service-card, .pillar, .service-detail, .about-text, .mv-card, .pricing-card, .form-container'
+    );
+    animEls.forEach(el => {
+      const rect = el.getBoundingClientRect();
+      if (rect.top < window.innerHeight - 80) {
+        el.classList.add('visible');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', checkVisibility);
+  window.addEventListener('load', checkVisibility);
+  setTimeout(checkVisibility, 300);
+
+  // Dynamic year for footer
+  document.getElementById('current-year').textContent = new Date().getFullYear();
+
+  // Nav shrink on scroll
+  window.addEventListener('scroll', () => {
+    document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Stagger service cards
+  document.querySelectorAll('.service-card').forEach((card, i) => {
+    card.style.transitionDelay = (i * 0.1) + 's';
+  });
+  document.querySelectorAll('.pillar').forEach((p, i) => {
+    p.style.transitionDelay = (i * 0.1) + 's';
+  });
+  document.querySelectorAll('.stat-card').forEach((c, i) => {
+    c.style.transitionDelay = (i * 0.1) + 's';
+  });
+  document.querySelectorAll('.mv-card').forEach((card, i) => {
+    card.style.transitionDelay = (i * 0.1) + 's';
+  });
+  document.querySelectorAll('.pricing-card').forEach((card, i) => {
+    card.style.transitionDelay = (i * 0.1) + 's';
+  });
+
+  // Handle inquiry button clicks - pre-select service and go to contact page
+  function handleInquire(serviceType) {
+    const serviceMap = {
+      'tech': 'Tech Solutions',
+      'logistics': 'Logistics Services',
+      'ecommerce': 'E-Commerce Solutions',
+      'health': 'Health Services'
+    };
+    sessionStorage.setItem('selectedService', serviceMap[serviceType]);
+    showPage('contact');
+  }
+
+  // Pre-select service on contact page if coming from inquiry button
+  function preSelectService() {
+    const selectedService = sessionStorage.getItem('selectedService');
+    if (selectedService) {
+      const checkboxes = document.querySelectorAll('#contact-form input[name="services"]');
+      checkboxes.forEach(cb => {
+        if (cb.value === selectedService) {
+          cb.checked = true;
+        }
+      });
+      sessionStorage.removeItem('selectedService');
+    }
+  }
+
+  // Form submission handler
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const formData = new FormData(form);
+
+    // Get checked services
+    const services = formData.getAll('services');
+
+    // Validate at least one service is selected
+    if (services.length === 0) {
+      alert('Please select at least one service you are interested in.');
+      return;
+    }
+
+    // Show confirmation message
+    alert(`Thank you for your inquiry!\n\nName: ${formData.get('name')}\nEmail: ${formData.get('email')}\nCompany: ${formData.get('company') || 'Not provided'}\nServices: ${services.join(', ')}\nMessage: ${formData.get('message')}\n\nWe'll get back to you within 24 hours.`);
+
+    // Reset form
+    form.reset();
+  }
+
+  // Mobile menu toggle
+  const burgerMenu = document.getElementById('burgerMenu');
+  const mobileNav = document.getElementById('mobileNav');
+  const mobileOverlay = document.getElementById('mobileOverlay');
+
+  function toggleMobileMenu() {
+    burgerMenu.classList.toggle('active');
+    mobileNav.classList.toggle('active');
+    mobileOverlay.classList.toggle('active');
+    document.body.style.overflow = mobileNav.classList.contains('active') ? 'hidden' : '';
+  }
+
+  function closeMobileMenu() {
+    burgerMenu.classList.remove('active');
+    mobileNav.classList.remove('active');
+    mobileOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  burgerMenu.addEventListener('click', toggleMobileMenu);
+  mobileOverlay.addEventListener('click', closeMobileMenu);
+
+  // Mobile dropdown toggle
+  function toggleMobileDropdown(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    const dropdown = event.target.closest('.mobile-dropdown');
+    dropdown.classList.toggle('active');
+  }
+
+  // Modify showPage to also close mobile menu and pre-select service
+  const originalShowPage = showPage;
+  showPage = function(name) {
+    originalShowPage(name);
+    closeMobileMenu();
+    if (name === 'contact') {
+      setTimeout(preSelectService, 100);
+    }
+  };
+
+  // Back to top button
+  const backToTopBtn = document.getElementById('backToTop');
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 500) {
+      backToTopBtn.classList.add('visible');
+    } else {
+      backToTopBtn.classList.remove('visible');
+    }
+  });
+
+  backToTopBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+
+  // Close mobile menu on resize to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900) {
+      closeMobileMenu();
+    }
+  });
+</script>
+</body>
+</html>
