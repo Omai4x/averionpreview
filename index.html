@@ -392,23 +392,8 @@
   }
 
   /* ─── PAGE SECTIONS ─── */
-  .page {
-    display: block;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.4s ease-out, visibility 0.4s ease-out;
-  }
-
-  .page.active {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  .page-exit {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease-in, visibility 0.3s ease-in;
-  }
+  .page { display: none; }
+  .page.active { display: block; }
 
   section { position: relative; z-index: 1; }
 
@@ -2618,35 +2603,12 @@
 
 <script>
   function showPage(name) {
-    const currentPage = document.querySelector('.page.active');
-    const newPage = document.getElementById('page-' + name);
-
-    if (!newPage || currentPage === newPage) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setTimeout(checkVisibility, 100);
-      return;
-    }
-
-    // Fade out current page if exists
-    if (currentPage) {
-      currentPage.classList.add('page-exit');
-    }
-
-    // After exit transition, switch to new page
-    setTimeout(() => {
-      if (currentPage) {
-        currentPage.classList.remove('active', 'page-exit');
-      }
-      newPage.classList.add('active');
-
-      // Update navigation active state
-      document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
-      const navLink = document.getElementById('nav-' + name);
-      if (navLink) navLink.classList.add('active');
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      setTimeout(checkVisibility, 100);
-    }, 300);
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    document.getElementById('nav-' + name)?.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(checkVisibility, 100);
   }
 
   function toggleDropdown(event) {
